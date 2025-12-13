@@ -56,7 +56,16 @@ export class SnippetsProvider implements vscode.TreeDataProvider<SnippetTreeItem
       this._onDidChangeTreeData.fire();
     } catch (error) {
       Logger.error('Failed to refresh snippets', error);
-      vscode.window.showErrorMessage('Failed to load snippets. Please check your connection.');
+
+      // Check if it's an authentication error
+      const errorMessage = error instanceof Error ? error.message : '';
+      if (errorMessage.includes('Unauthorized') || errorMessage.includes('401')) {
+        Logger.info('Not authenticated - clearing snippets');
+        this.snippets = [];
+        this._onDidChangeTreeData.fire();
+      } else {
+        vscode.window.showErrorMessage('Failed to load snippets. Please check your connection.');
+      }
     }
   }
 

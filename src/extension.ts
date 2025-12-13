@@ -28,6 +28,18 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     const apiClient = new CodeCourtClient(authManager);
     const snippetsProvider = new SnippetsProvider(apiClient);
 
+    // Register URI handler for OAuth callbacks
+    const uriHandler = vscode.window.registerUriHandler({
+      handleUri: async (uri: vscode.Uri) => {
+        Logger.info(`Received URI callback: ${uri.toString()}`);
+
+        // Handle auth callback
+        if (uri.path === '/auth-callback') {
+          await authManager.handleAuthCallback(uri);
+        }
+      },
+    });
+
     // Register tree view for snippets sidebar
     const treeView = vscode.window.createTreeView('codecourt.snippetsView', {
       treeDataProvider: snippetsProvider,
@@ -38,7 +50,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     registerCommands(context, authManager, apiClient, snippetsProvider);
 
     // Add to subscriptions for proper cleanup
-    context.subscriptions.push(treeView);
+    context.subscriptions.push(uriHandler, treeView);
 
     // Auto-refresh snippets if user is authenticated and setting is enabled
     const config = vscode.workspace.getConfiguration('codecourt');

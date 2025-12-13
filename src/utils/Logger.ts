@@ -12,6 +12,8 @@ class LoggerService {
   constructor() {
     this.outputChannel = vscode.window.createOutputChannel('Code Court');
     this.isDevelopment = process.env.NODE_ENV === 'development';
+    // Show output channel immediately so it appears in dropdown
+    this.outputChannel.show(true); // true = preserveFocus (don't steal focus)
   }
 
   /**

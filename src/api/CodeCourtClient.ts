@@ -38,7 +38,7 @@ export class CodeCourtClient {
   public async getMySnippets(): Promise<Snippet[]> {
     try {
       Logger.info('Fetching user snippets...');
-      const response = await this.axiosInstance.get<SnippetsResponse>('/api/snippets');
+      const response = await this.axiosInstance.get<SnippetsResponse>('/api/vscode/snippets');
       Logger.info(`Fetched ${response.data.snippets.length} snippets`);
       return response.data.snippets;
     } catch (error) {
@@ -53,7 +53,7 @@ export class CodeCourtClient {
   public async searchSnippets(params: SnippetSearchParams): Promise<Snippet[]> {
     try {
       Logger.info(`Searching snippets with params: ${JSON.stringify(params)}`);
-      const response = await this.axiosInstance.get<SnippetsResponse>('/api/snippets/search', {
+      const response = await this.axiosInstance.get<SnippetsResponse>('/api/vscode/snippets', {
         params,
       });
       return response.data.snippets;
@@ -69,7 +69,7 @@ export class CodeCourtClient {
   public async getSnippet(id: string): Promise<Snippet> {
     try {
       Logger.info(`Fetching snippet: ${id}`);
-      const response = await this.axiosInstance.get<{ snippet: Snippet }>(`/api/snippets/${id}`);
+      const response = await this.axiosInstance.get<{ snippet: Snippet }>(`/api/vscode/snippets/${id}`);
       return response.data.snippet;
     } catch (error) {
       Logger.error(`Failed to fetch snippet ${id}`, error);
@@ -83,7 +83,7 @@ export class CodeCourtClient {
   public async createSnippet(data: CreateSnippetRequest): Promise<Snippet> {
     try {
       Logger.info(`Creating snippet: ${data.title}`);
-      const response = await this.axiosInstance.post<Snippet>('/api/snippets', data);
+      const response = await this.axiosInstance.post<Snippet>('/api/vscode/snippets', data);
       Logger.info(`Snippet created: ${response.data.id}`);
       return response.data;
     } catch (error) {
