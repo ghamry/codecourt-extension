@@ -1,0 +1,201 @@
+{
+  "name": "codecourt",
+  "displayName": "Code Court",
+  "description": "Access your Code Court snippets directly in VS Code. Browse, insert, and create snippets without leaving your editor.",
+  "version": "0.1.0",
+  "publisher": "codecourt",
+  "icon": "assets/icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "snippets",
+    "code snippets",
+    "code sharing",
+    "productivity",
+    "codecourt"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "codecourt.authenticate",
+        "title": "Sign In",
+        "category": "Code Court"
+      },
+      {
+        "command": "codecourt.signOut",
+        "title": "Sign Out",
+        "category": "Code Court"
+      },
+      {
+        "command": "codecourt.refreshSnippets",
+        "title": "Refresh Snippets",
+        "category": "Code Court",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "codecourt.insertSnippet",
+        "title": "Insert Snippet at Cursor",
+        "category": "Code Court",
+        "icon": "$(insert)"
+      },
+      {
+        "command": "codecourt.createSnippet",
+        "title": "Create Snippet from Selection",
+        "category": "Code Court",
+        "icon": "$(add)"
+      },
+      {
+        "command": "codecourt.searchSnippets",
+        "title": "Search Snippets",
+        "category": "Code Court",
+        "icon": "$(search)"
+      },
+      {
+        "command": "codecourt.openInBrowser",
+        "title": "Open in Browser",
+        "category": "Code Court",
+        "icon": "$(link-external)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "codecourt-sidebar",
+          "title": "Code Court",
+          "icon": "assets/sidebar-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "codecourt-sidebar": [
+        {
+          "id": "codecourt.snippetsView",
+          "name": "My Snippets",
+          "icon": "assets/sidebar-icon.svg",
+          "contextualTitle": "Code Court Snippets"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "codecourt.refreshSnippets",
+          "when": "view == codecourt.snippetsView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "codecourt.searchSnippets",
+          "when": "view == codecourt.snippetsView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "codecourt.createSnippet",
+          "when": "view == codecourt.snippetsView",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "codecourt.insertSnippet",
+          "when": "view == codecourt.snippetsView && viewItem == snippet",
+          "group": "inline@1"
+        },
+        {
+          "command": "codecourt.openInBrowser",
+          "when": "view == codecourt.snippetsView && viewItem == snippet",
+          "group": "inline@2"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "codecourt.createSnippet",
+          "when": "editorHasSelection",
+          "group": "codecourt@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "codecourt.insertSnippet",
+          "when": "false"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Code Court",
+      "properties": {
+        "codecourt.apiUrl": {
+          "type": "string",
+          "default": "https://www.codecourt.dev",
+          "description": "Code Court API URL (change for local development)"
+        },
+        "codecourt.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically refresh snippets on startup"
+        },
+        "codecourt.insertMode": {
+          "type": "string",
+          "enum": [
+            "cursor",
+            "replace"
+          ],
+          "default": "cursor",
+          "description": "How to insert snippets: at cursor or replace selection"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "webpack --mode production",
+    "watch": "webpack --mode development --watch",
+    "test": "node ./out/test/runTest.js",
+    "lint": "eslint src --ext ts",
+    "lint:fix": "eslint src --ext ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "@vscode/test-electron": "^2.3.9",
+    "@vscode/vsce": "^2.22.0",
+    "dotenv": "^17.2.3",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "glob": "^10.3.10",
+    "mocha": "^10.2.0",
+    "prettier": "^3.2.4",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "axios": "^1.6.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/codecourt-vscode.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/codecourt-vscode/issues"
+  },
+  "homepage": "https://www.codecourt.dev",
+  "license": "MIT"
+}
