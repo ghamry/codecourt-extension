@@ -64,6 +64,12 @@
         "title": "Open in Browser",
         "category": "Code Court",
         "icon": "$(link-external)"
+      },
+      {
+        "command": "codecourt.deleteSnippet",
+        "title": "Delete Snippet",
+        "category": "Code Court",
+        "icon": "$(trash)"
       }
     ],
     "viewsContainers": {
@@ -113,6 +119,11 @@
           "command": "codecourt.openInBrowser",
           "when": "view == codecourt.snippetsView && viewItem == snippet",
           "group": "inline@2"
+        },
+        {
+          "command": "codecourt.deleteSnippet",
+          "when": "view == codecourt.snippetsView && viewItem == snippet",
+          "group": "snippet@3"
         }
       ],
       "editor/context": [
