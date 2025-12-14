@@ -43,6 +43,30 @@ export function isDevelopment(): boolean {
 }
 
 /**
+ * Get authentication timeout in milliseconds
+ * Default: 5 minutes (300000ms)
+ */
+export function getAuthTimeout(): number {
+  const config = vscode.workspace.getConfiguration('codecourt');
+  // Priority: VS Code Settings > Environment Variable > Default
+  const configuredTimeout = config.get<number>('authTimeout');
+  
+  if (configuredTimeout) {
+    return configuredTimeout;
+  }
+
+  const envTimeout = process.env.CODECOURT_AUTH_TIMEOUT;
+  if (envTimeout) {
+    const parsed = parseInt(envTimeout, 10);
+    if (!isNaN(parsed)) {
+      return parsed;
+    }
+  }
+
+  return 5 * 60 * 1000; // 5 minutes default
+}
+
+/**
  * Get extension ID
  */
 export function getExtensionId(): string {

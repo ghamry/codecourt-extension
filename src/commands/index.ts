@@ -10,7 +10,7 @@ import { CodeCourtClient } from '../api/CodeCourtClient';
 import { SnippetsProvider, SnippetTreeItem } from '../providers/SnippetsProvider';
 import { Logger } from '../utils/Logger';
 import { getApiBaseUrl } from '../utils/config';
-import axios from 'axios';
+
 
 /**
  * Register all extension commands
@@ -283,7 +283,7 @@ async function searchSnippetsCommand(apiClient: CodeCourtClient): Promise<void> 
     if (!query) return;
     const results = await vscode.window.withProgress(
       { location: vscode.ProgressLocation.Notification, title: 'Searching snippets...', cancellable: false },
-      async () => await apiClient.searchSnippets({ query })
+      async () => await apiClient.searchSnippets({ search: query })
     );
     if (results.length === 0) {
       vscode.window.showInformationMessage(`No snippets found for "${query}"`);
@@ -337,29 +337,23 @@ async function deleteSnippetCommand(
       'Delete',
       'Cancel'
     );
+
     if (confirm !== 'Delete') return;
+
     await vscode.window.withProgress(
       { location: vscode.ProgressLocation.Notification, title: 'Deleting snippet...', cancellable: false },
       async () => {
-        const authManager = (apiClient as any).authManager;
-        const token = await authManager.getAccessToken();
-        const axiosInstance = axios.create({
-          baseURL: getApiBaseUrl(),
-          timeout: 10000,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        await axiosInstance.delete(`/api/vscode/snippets/${item.snippet.id}`);
+        await apiClient.deleteSnippet(item.snippet.id);
       }
     );
+
     Logger.info(`Snippet deleted successfully: ${item.snippet.id}`);
     vscode.window.showInformationMessage(`Deleted: ${item.snippet.title}`);
     await snippetsProvider.refresh();
   } catch (error) {
     Logger.error('Failed to delete snippet', error);
-    vscode.window.showErrorMessage('Failed to delete snippet. Please try again.');
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    vscode.window.showErrorMessage(`Failed to delete snippet: ${errorMessage}`);
   }
 }
 /**

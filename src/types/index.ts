@@ -64,7 +64,7 @@ export interface SnippetsResponse {
  * Search/filter parameters for snippets
  */
 export interface SnippetSearchParams {
-  query?: string;
+  search?: string;
   language?: string;
   tags?: string[];
   authorId?: string;

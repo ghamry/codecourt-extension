@@ -93,12 +93,33 @@ export class CodeCourtClient {
   }
 
   /**
+   * Delete snippet by ID
+   */
+  public async deleteSnippet(id: string): Promise<void> {
+    try {
+      Logger.info(`Deleting snippet: ${id}`);
+      await this.axiosInstance.delete(`/api/vscode/snippets/${id}`);
+      Logger.info(`Snippet deleted: ${id}`);
+    } catch (error) {
+      Logger.error(`Failed to delete snippet ${id}`, error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
    * Handle API errors consistently
    */
   private handleError(error: unknown): Error {
     if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
       const message = error.response?.data?.error || error.message;
-      return new Error(`API Error: ${message}`);
+
+      // Special handling for 405 Method Not Allowed - indicates backend mismatch
+      if (status === 405) {
+        return new Error(`Server returned 405 Method Not Allowed. The backend might not support deleting snippets yet. Error: ${message}`);
+      }
+
+      return new Error(`API Error (${status}): ${message}`);
     }
     return error instanceof Error ? error : new Error('Unknown error occurred');
   }

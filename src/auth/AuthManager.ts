@@ -5,15 +5,17 @@
  */
 
 import * as vscode from 'vscode';
+import axios from 'axios';
 import { AuthData, TokenResponse } from '../types';
 import { Logger } from '../utils/Logger';
+import { getAuthTimeout } from '../utils/config';
 
 const AUTH_SECRET_KEY = 'codecourt.auth';
 
 export class AuthManager {
   private authPromiseResolve?: (success: boolean) => void;
 
-  constructor(private readonly context: vscode.ExtensionContext) {}
+  constructor(private readonly context: vscode.ExtensionContext) { }
 
   /**
    * Check if user is authenticated
@@ -95,14 +97,14 @@ export class AuthManager {
       return new Promise<boolean>((resolve) => {
         this.authPromiseResolve = resolve;
 
-        // Timeout after 5 minutes
+        // Timeout from configuration
         setTimeout(() => {
           if (this.authPromiseResolve) {
             Logger.warn('Authentication timed out');
             this.authPromiseResolve(false);
             this.authPromiseResolve = undefined;
           }
-        }, 5 * 60 * 1000);
+        }, getAuthTimeout());
       });
 
     } catch (error) {
@@ -160,26 +162,21 @@ export class AuthManager {
       const config = vscode.workspace.getConfiguration('codecourt');
       const apiUrl = config.get<string>('apiUrl') || process.env.CODECOURT_API_URL || 'https://www.codecourt.dev';
 
-      // Verify token with API
+      // Verify token with API using Axios
       const verifyUrl = `${apiUrl}/api/auth/vscode-verify`;
-      const response = await fetch(verifyUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token }),
-      });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({})) as { error?: string };
-        throw new Error(errorData.error || 'Token verification failed');
-      }
-
-      const data = await response.json() as {
+      const response = await axios.post<{
         valid?: boolean;
         user?: { id: string; email: string; name: string };
         expiresAt?: string;
-      };
+      }>(verifyUrl, { token }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        timeout: 10000
+      });
+
+      const data = response.data;
 
       if (!data.valid || !data.user) {
         throw new Error('Invalid token response from server');
