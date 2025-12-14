@@ -55,7 +55,19 @@ export function registerCommands(
 
   context.subscriptions.push(
     vscode.commands.registerCommand('codecourt.searchSnippets', async () => {
-      await searchSnippetsCommand(apiClient);
+      await searchSnippetsCommand(snippetsProvider);
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('codecourt.clearFilter', async () => {
+      await clearFilterCommand(snippetsProvider);
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('codecourt.editSnippet', async (item: SnippetTreeItem) => {
+      await editSnippetCommand(item, apiClient, snippetsProvider);
     })
   );
 
@@ -151,15 +163,14 @@ async function insertSnippetCommand(item: SnippetTreeItem): Promise<void> {
   const config = vscode.workspace.getConfiguration('codecourt');
   const insertMode = config.get<string>('insertMode', 'cursor');
 
-  await editor.edit((editBuilder) => {
-    if (insertMode === 'replace' && !editor.selection.isEmpty) {
-      // Replace selection
-      editBuilder.replace(editor.selection, snippet.code);
-    } else {
-      // Insert at cursor
-      editBuilder.insert(editor.selection.active, snippet.code);
-    }
-  });
+  // Use insertSnippet instead of editBuilder to support variables like $1, ${TM_FILENAME}
+  if (insertMode === 'replace' && !editor.selection.isEmpty) {
+    // Replace selection
+    await editor.insertSnippet(new vscode.SnippetString(snippet.code), editor.selection);
+  } else {
+    // Insert at cursor
+    await editor.insertSnippet(new vscode.SnippetString(snippet.code), editor.selection.active);
+  }
 
   vscode.window.showInformationMessage(`Inserted: ${snippet.title}`);
   Logger.info(`Inserted snippet: ${snippet.title} (${snippet.id})`);
@@ -274,51 +285,30 @@ async function createSnippetCommand(
 /**
  * Search snippets command handler
  */
-async function searchSnippetsCommand(apiClient: CodeCourtClient): Promise<void> {
-  try {
-    const query = await vscode.window.showInputBox({
-      prompt: 'Search Code Court snippets',
-      placeHolder: 'Enter keywords, tags, or language...',
-    });
-    if (!query) return;
-    const results = await vscode.window.withProgress(
-      { location: vscode.ProgressLocation.Notification, title: 'Searching snippets...', cancellable: false },
-      async () => await apiClient.searchSnippets({ search: query })
-    );
-    if (results.length === 0) {
-      vscode.window.showInformationMessage(`No snippets found for "${query}"`);
-      return;
+async function searchSnippetsCommand(
+  snippetsProvider: SnippetsProvider
+): Promise<void> {
+  const query = await vscode.window.showInputBox({
+    prompt: 'Filter snippets in sidebar',
+    placeHolder: 'Enter keywords to filter...',
+  });
+
+  if (query !== undefined) {
+    if (query) {
+      await snippetsProvider.setFilter(query);
+    } else {
+      await snippetsProvider.setFilter('');
     }
-    const selectedSnippet = await vscode.window.showQuickPick(
-      results.map((snippet) => ({
-        label: snippet.title,
-        description: snippet.language,
-        detail: snippet.description || 'No description',
-        snippet: snippet,
-      })),
-      { placeHolder: `Found ${results.length} snippet(s) - Select one to insert` }
-    );
-    if (!selectedSnippet) return;
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-      vscode.window.showWarningMessage('No active editor found');
-      return;
-    }
-    const config = vscode.workspace.getConfiguration('codecourt');
-    const insertMode = config.get<string>('insertMode', 'cursor');
-    await editor.edit((editBuilder) => {
-      if (insertMode === 'replace' && !editor.selection.isEmpty) {
-        editBuilder.replace(editor.selection, selectedSnippet.snippet.code);
-      } else {
-        editBuilder.insert(editor.selection.active, selectedSnippet.snippet.code);
-      }
-    });
-    vscode.window.showInformationMessage(`Inserted: ${selectedSnippet.label}`);
-    Logger.info(`Inserted snippet from search: ${selectedSnippet.label} (${selectedSnippet.snippet.id})`);
-  } catch (error) {
-    Logger.error('Failed to search snippets', error);
-    vscode.window.showErrorMessage('Failed to search snippets. Please try again.');
   }
+}
+
+/**
+ * Clear filter command handler
+ */
+async function clearFilterCommand(
+  snippetsProvider: SnippetsProvider
+): Promise<void> {
+  await snippetsProvider.setFilter('');
 }
 
 
@@ -363,4 +353,63 @@ async function openInBrowserCommand(item: SnippetTreeItem): Promise<void> {
   const url = `${getApiBaseUrl()}/snippets/${item.snippet.id}`;
   vscode.env.openExternal(vscode.Uri.parse(url));
   Logger.info(`Opened snippet in browser: ${item.snippet.id}`);
+}
+
+/**
+ * Edit snippet command handler
+ */
+async function editSnippetCommand(
+  item: SnippetTreeItem,
+  apiClient: CodeCourtClient,
+  snippetsProvider: SnippetsProvider
+): Promise<void> {
+  try {
+    // 1. Edit Title
+    const title = await vscode.window.showInputBox({
+      prompt: 'Edit Snippet Title',
+      value: item.snippet.title,
+      validateInput: (value) => value.length < 3 ? 'Title must be at least 3 characters' : null
+    });
+    if (title === undefined) return; // Cancelled
+
+    // 2. Edit Description
+    const description = await vscode.window.showInputBox({
+      prompt: 'Edit Description (Optional)',
+      value: item.snippet.description || ''
+    });
+    if (description === undefined) return;
+
+    // 3. Edit Visibility
+    const visibility = await vscode.window.showQuickPick(
+      ['PUBLIC', 'PROTECTED', 'PRIVATE'],
+      {
+        placeHolder: `Select Visibility (Current: ${item.snippet.visibility})`
+      }
+    );
+    if (!visibility) return;
+
+    // 4. Update via API
+    await vscode.window.withProgress(
+      { location: vscode.ProgressLocation.Notification, title: 'Updating snippet...' },
+      async () => {
+        // We include original code/language/tags to ensure they are preserved if backend expects full object
+        await apiClient.updateSnippet(item.snippet.id, {
+          title,
+          description,
+          visibility: visibility as any,
+          code: item.snippet.code,
+          language: item.snippet.language,
+          tags: item.snippet.tags
+        });
+      }
+    );
+
+    vscode.window.showInformationMessage(`Updated: ${title}`);
+    await snippetsProvider.refresh();
+
+  } catch (error) {
+    Logger.error('Failed to update snippet', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    vscode.window.showErrorMessage(`Failed to update snippet: ${errorMessage}`);
+  }
 }

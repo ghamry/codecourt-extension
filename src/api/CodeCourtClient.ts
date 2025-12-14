@@ -93,6 +93,21 @@ export class CodeCourtClient {
   }
 
   /**
+   * Update snippet by ID
+   */
+  public async updateSnippet(id: string, data: Partial<CreateSnippetRequest>): Promise<Snippet> {
+    try {
+      Logger.info(`Updating snippet: ${id}`);
+      const response = await this.axiosInstance.put<Snippet>(`/api/vscode/snippets/${id}`, data);
+      Logger.info(`Snippet updated: ${id}`);
+      return response.data;
+    } catch (error) {
+      Logger.error(`Failed to update snippet ${id}`, error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
    * Delete snippet by ID
    */
   public async deleteSnippet(id: string): Promise<void> {

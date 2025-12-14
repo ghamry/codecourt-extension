@@ -1,110 +1,194 @@
-# Code Court for VS Code
+# Code Court - VS Code Extension
 
-> Access your Code Court snippets directly in VS Code. Browse, insert, and create code snippets without ever leaving your editor.
+Seamlessly access, create, and manage your [Code Court](https://www.codecourt.dev) snippets directly from VS Code.
 
 ## ✨ Features
 
-- **Browse Snippets**: View all your Code Court snippets in the sidebar
-- **Quick Insert**: One-click to insert any snippet at your cursor
-- **Create from Selection**: Turn selected code into a snippet instantly
-- **Search**: Find snippets by title, language, or tags
-- **Seamless Sync**: Always up-to-date with your Code Court account
+### 🔐 Secure Authentication
+- **One-click OAuth login** - No manual token copy/paste
+- Automatic browser callback
+- Secure token storage in VS Code SecretStorage
+- 90-day session duration
+
+### 📚 Snippet Management
+- **Browse all your snippets** in a dedicated sidebar
+- **Create snippets** from selected code or entire files
+- **Edit snippets** (title, description, visibility)
+- **Delete snippets** with confirmation
+- **Insert snippets** into active editor with one click
+
+### 🔍 Smart Search & Filtering
+- **Live filtering** by keywords, tags, or language
+- Search across title, description, and code
+- Clear filter with one click
+- "No results" state with helpful message
+
+### 🎨 Rich UX Features
+- **Snippet variables** support ($1, ${TM_FILENAME}, etc.)
+- **Hover preview** with Markdown-formatted code
+- **Auto-detect language** from file extension
+- **Progress indicators** for all operations
+- **Keyboard shortcuts** for quick actions
+
+### 🌐 Integration
+- **Open in browser** to view/share on Code Court
+- **Visibility control** (Public, Protected, Private)
+- **Tags support** for better organization
+- **Auto-refresh** after create/edit/delete
 
 ## 🚀 Getting Started
 
-### 1. Installation
+### Installation
 
-Install the extension from the VS Code Marketplace or search for "Code Court" in VS Code extensions.
+1. Install from [VS Code Marketplace](#) (coming soon)
+2. Or install manually:
+   ```bash
+   code --install-extension codecourt-vscode-0.1.0.vsix
+   ```
 
-### 2. Sign In
+### First Use
 
-1. Click the Code Court icon in the Activity Bar
-2. Click "Sign In" or run the `Code Court: Sign In` command
-3. Authenticate with your Code Court account
-4. You're ready to go!
+1. Open the Code Court sidebar (click the icon in Activity Bar)
+2. Click "Sign In" button
+3. Browser opens to Code Court authentication
+4. Approve access
+5. Automatically redirected back to VS Code
+6. Your snippets load automatically! 🎉
 
-### 3. Use Your Snippets
+## 📖 Usage
 
-- **Browse**: Expand the Code Court sidebar to see all your snippets
-- **Insert**: Click the insert icon next to any snippet
-- **Create**: Select code, right-click, and choose "Create Snippet from Selection"
-- **Search**: Click the search icon in the sidebar
+### Creating a Snippet
 
-## 📖 Commands
+**From selection:**
+1. Select code in any file
+2. Right-click > "Code Court: Create Snippet from Selection"
+3. Or: `Ctrl+Shift+P` > "Code Court: Create Snippet from Selection"
 
-Access these commands via the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`):
+**From entire file:**
+1. Open any file (no selection needed)
+2. `Ctrl+Shift+P` > "Code Court: Create Snippet from Selection"
 
-- `Code Court: Sign In` - Authenticate with Code Court
-- `Code Court: Sign Out` - Sign out of your account
-- `Code Court: Refresh Snippets` - Reload your snippets
-- `Code Court: Create Snippet from Selection` - Create a new snippet from selected code
-- `Code Court: Search Snippets` - Search your snippets
-- `Code Court: Open in Browser` - Open snippet in Code Court web app
+**Wizard steps:**
+- Enter title (min 3 characters)
+- Enter description (optional)
+- Enter tags, comma-separated (optional)
+- Select visibility (Public/Protected/Private)
 
-## ⚙️ Settings
+### Inserting a Snippet
 
-Configure the extension in VS Code Settings:
+**From sidebar:**
+1. Click any snippet in sidebar
+2. Code inserts at cursor position
 
-- `codecourt.apiUrl` - Code Court API URL (default: `https://www.codecourt.dev`)
-- `codecourt.autoRefresh` - Auto-refresh snippets on startup (default: `true`)
-- `codecourt.insertMode` - How to insert snippets: `cursor` or `replace` (default: `cursor`)
+**From search:**
+1. `Ctrl+Shift+P` > "Code Court: Search Snippets"
+2. Enter search query
+3. Select snippet from results
+4. Code inserts at cursor position
+
+### Editing a Snippet
+
+1. Right-click snippet in sidebar
+2. Select "Edit Snippet"
+3. Update title, description, or visibility
+4. Confirm
+
+### Filtering Snippets
+
+1. Click search icon in sidebar toolbar
+2. Enter filter keywords
+3. Sidebar shows matching snippets only
+4. Click clear icon to remove filter
+
+## ⌨️ Keyboard Shortcuts
+
+| Command | Shortcut | Description |
+|---------|----------|-------------|
+| Sign In | - | Authenticate with Code Court |
+| Create Snippet | - | Create from selection/file |
+| Search Snippets | - | Filter sidebar snippets |
+| Refresh Snippets | - | Reload from server |
+
+*Tip: Use Command Palette (`Ctrl+Shift+P`) to access all commands*
+
+## 🎨 Extension Settings
+
+This extension contributes the following settings:
+
+- `codecourt.apiUrl`: Code Court API URL (default: `https://www.codecourt.dev`)
+- `codecourt.insertMode`: How to insert snippets (`cursor` or `replace`)
+
+## 📸 Screenshots
+
+### Snippet Sidebar
+![Sidebar](./assets/screenshot-sidebar.png)
+*Browse and manage all your snippets*
+
+### Create Snippet Wizard
+![Create](./assets/screenshot-create.png)
+*Easy step-by-step snippet creation*
+
+### Hover Preview
+![Preview](./assets/screenshot-preview.png)
+*Rich preview on hover*
+
+### Search & Filter
+![Search](./assets/screenshot-search.png)
+*Find snippets instantly*
 
 ## 🔒 Privacy & Security
 
-- Your authentication token is stored securely in VS Code's SecretStorage
-- All communication with Code Court uses HTTPS
-- No data is collected or shared with third parties
+- **OAuth 2.0** authentication with secure token storage
+- **Token encryption** via VS Code SecretStorage API
+- **HTTPS only** - All API calls encrypted
+- **No data collection** - Your snippets stay private
+- **Open source** - Review the code anytime
 
-## 🐛 Troubleshooting
+## 🐛 Known Issues
 
-### Extension won't activate
-- Reload VS Code: `Developer: Reload Window`
-- Check the Output panel: View > Output > Code Court
+None at the moment! Found a bug? [Report it here](https://github.com/your-username/codecourt-vscode/issues)
 
-### Authentication issues
-- Sign out and sign in again
-- Check your internet connection
-- Verify you can access https://www.codecourt.dev
+## 📝 Release Notes
 
-### Snippets not loading
-- Click the refresh button in the sidebar
-- Check Output panel for errors
-- Ensure you're signed in
+### 0.1.0 (Initial Release)
 
-## 📝 Development
-
-### Prerequisites
-- Node.js 20+
-- VS Code 1.85+
-
-### Setup
-```bash
-npm install
-npm run watch
-```
-
-### Testing
-Press `F5` to run the extension in debug mode.
-
-### Building
-```bash
-npm run compile
-```
+**Features:**
+- Modern OAuth authentication
+- Complete CRUD operations (Create, Read, Update, Delete)
+- Sidebar filtering with live search
+- Snippet variables support
+- Hover preview
+- Edit snippet functionality
+- Rich error handling
 
 ## 🤝 Contributing
 
-Issues and pull requests are welcome! Visit [github.com/yourusername/codecourt-vscode](https://github.com/yourusername/codecourt-vscode)
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-MIT License - see LICENSE file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🔗 Links
 
-- [Code Court Web App](https://www.codecourt.dev)
-- [Report Issues](https://github.com/yourusername/codecourt-vscode/issues)
-- [Documentation](https://www.codecourt.dev/docs)
+- [Code Court Website](https://www.codecourt.dev)
+- [GitHub Repository](https://github.com/your-username/codecourt-vscode)
+- [Report Issues](https://github.com/your-username/codecourt-vscode/issues)
+- [VS Code Marketplace](#) (coming soon)
+
+## 💬 Support
+
+Need help? Have questions?
+
+- [Open an issue](https://github.com/your-username/codecourt-vscode/issues)
+- [Visit Code Court](https://www.codecourt.dev)
 
 ---
 
-Made with ❤️ for developers who love clean code
+**Made with ❤️ for developers by developers**
