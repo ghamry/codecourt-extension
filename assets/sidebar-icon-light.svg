@@ -1,6 +1,6 @@
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Code Court Identity: Left Triangle -->
+  <!-- Code Court Identity: Left Triangle (Black for Light Mode) -->
   <path d="M5 20L11 4H8L2 20H5Z" fill="#000000"/>
-  <!-- Code Court Identity: Right Chevron/Arrow -->
+  <!-- Code Court Identity: Right Chevron/Arrow (Black for Light Mode) -->
   <path d="M12 20H18L22 12L18 4H15L19 12L15 20H12Z" fill="#000000"/>
 </svg>

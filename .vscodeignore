@@ -1,0 +1,57 @@
+# Source files
+src/**
+*.ts
+tsconfig.json
+
+# Build tools
+webpack.config.js
+node_modules/**
+.vscode/**
+.vscode-test/**
+
+# Documentation (keep only essential)
+*.md
+!README.md
+!CHANGELOG.md
+PUBLISHING_GUIDE.md
+WHATS_NEXT.md
+PHASES_COMPLETE.md
+FIXES_APPLIED.md
+TESTING_AUTH_FLOW.md
+IMPLEMENTATION_SUMMARY.md
+PHASE_*.md
+walkthrough.md
+TEST_CHECKLIST.md
+
+# Git
+.git/**
+.gitignore
+.github/**
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artifacts
+*.vsix
+dist/**/*.map
+
+# IDE
+.DS_Store
+.idea/**
+
+# Backup files
+*.backup
+*.bak
+*_backup.ts
+*_reference.ts
+*_final.ts
+
+# Test files
+test/**
+*.test.ts
+*.spec.ts

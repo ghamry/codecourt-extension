@@ -1,7 +1,7 @@
 {
   "name": "codecourt",
-  "displayName": "Code Court",
-  "description": "Access your Code Court snippets directly in VS Code. Browse, insert, and create snippets without leaving your editor.",
+  "displayName": "Code Court - Snippet Manager",
+  "description": "Seamlessly access, create, and manage your Code Court snippets directly from VS Code. Browse, search, insert, and organize your code snippets without leaving your editor.",
   "version": "0.1.0",
   "publisher": "codecourt",
   "icon": "assets/icon.png",
@@ -10,6 +10,7 @@
   },
   "categories": [
     "Snippets",
+    "Programming Languages",
     "Other"
   ],
   "keywords": [
@@ -17,7 +18,10 @@
     "code snippets",
     "code sharing",
     "productivity",
-    "codecourt"
+    "codecourt",
+    "snippet manager",
+    "code management",
+    "developer tools"
   ],
   "activationEvents": [
     "*"
@@ -224,11 +228,26 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/codecourt-vscode.git"
+    "url": "https://github.com/ghamry/codecourt-vscode.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/codecourt-vscode/issues"
+    "url": "https://github.com/ghamry/codecourt-vscode/issues"
   },
   "homepage": "https://www.codecourt.dev",
-  "license": "MIT"
+  "license": "MIT",
+  "author": {
+    "name": "Code Court",
+    "url": "https://www.codecourt.dev"
+  },
+  "galleryBanner": {
+    "color": "#171717",
+    "theme": "dark"
+  },
+  "badges": [
+    {
+      "url": "https://img.shields.io/badge/code--court-snippets-blue",
+      "href": "https://www.codecourt.dev",
+      "description": "Code Court Snippets"
+    }
+  ]
 }

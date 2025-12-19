@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="64" fill="#171717"/>
+  
+  <!-- Code Court triangle/chevron pattern - simplified and scaled -->
+  <g transform="translate(32, 32)">
+    <!-- Left triangle -->
+    <path fill="#FFFFFF" d="M 8 48 L 24 16 L 20 8 L 0 48 H 8 Z"/>
+    
+    <!-- Right chevron -->
+    <path fill="#FFFFFF" d="M 16 48 H 40 L 28 24 L 24 32 L 28 40 H 20 L 16 48 Z"/>
+  </g>
+  
+  <!-- Subtle code brackets decoration -->
+  <text x="18" y="100" font-family="monospace" font-size="24" fill="#FFFFFF" opacity="0.3">&lt;/&gt;</text>
+</svg>
