@@ -17,7 +17,16 @@
 
 ---
 
-## 📝 Step 1: Create VS Code Marketplace Publisher Account
+## 📝 Step 1: Create Demo Assets
+
+### 1.1 Generate Extension GIF
+To create a professional GIF for the marketplace:
+1.  **Download [ScreenToGif](https://www.screentogif.com/)**.
+2.  Follow the **[Demo Script](file:///C:/Users/ghamr/.gemini/antigravity/brain/2e497d1f-c9e4-49ac-a41c-8a35752490d2/DEMO_SCRIPT.md)** included in this project.
+3.  Save as `demo.gif` in `assets/`.
+4.  Add to `README.md`: `![Demo](assets/demo.gif)`
+
+## 📝 Step 2: Create VS Code Marketplace Publisher Account
 
 ### 1.1 Create Microsoft/Azure Account
 1. Go to [Azure DevOps](https://dev.azure.com)
