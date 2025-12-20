@@ -228,12 +228,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ghamry/codecourt-vscode.git"
+    "url": "https://github.com/ghamry/codecourt-extension.git"
   },
   "bugs": {
-    "url": "https://github.com/ghamry/codecourt-vscode/issues"
+    "url": "https://github.com/ghamry/codecourt-extension/issues"
   },
-  "homepage": "https://www.codecourt.dev",
+  "homepage": "https://github.com/ghamry/codecourt-extension#readme",
   "license": "MIT",
   "author": {
     "name": "Code Court",
