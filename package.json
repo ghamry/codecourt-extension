@@ -2,7 +2,7 @@
   "name": "codecourt",
   "displayName": "Code Court - Snippet Manager",
   "description": "Seamlessly access, create, and manage your Code Court snippets directly from VS Code. Browse, search, insert, and organize your code snippets without leaving your editor.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "codecourt",
   "icon": "assets/icon.png",
   "engines": {
