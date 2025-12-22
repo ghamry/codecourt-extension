@@ -15,14 +15,14 @@ import { Logger } from './utils/Logger';
  * Called when extension is activated (on startup per activationEvents)
  */
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
-  // // Initialize logger with context for environment detection
-  // Logger.initialize(context);
+  // Initialize logger with context for environment detection
+  Logger.initialize(context);
 
-  // Logger.info('Code Court extension is activating...');
-  // Logger.debug('Environment', {
-  //   extensionMode: context.extensionMode,
-  //   isDevelopment: context.extensionMode === vscode.ExtensionMode.Development
-  // });
+  Logger.info('Code Court extension is activating...');
+  Logger.debug('Environment', {
+    extensionMode: context.extensionMode,
+    isDevelopment: context.extensionMode === vscode.ExtensionMode.Development
+  });
 
   try {
     // Initialize core services following Dependency Injection pattern
