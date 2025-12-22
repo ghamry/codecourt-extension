@@ -105,9 +105,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 🔗 Links
 
 - [Code Court Website](https://www.codecourt.dev)
-- [GitHub Repository](https://github.com/your-username/codecourt-vscode)
-- [Report Issues](https://github.com/your-username/codecourt-vscode/issues)
-- [VS Code Marketplace](#) (coming soon)
+- [GitHub Repository](https://github.com/ghamry/codecourt-extension)
+- [Report Issues](https://github.com/ghamry/codecourt-extension/issues)
+- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=codecourt.codecourt)
 
 ---
 

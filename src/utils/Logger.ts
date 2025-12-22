@@ -7,19 +7,40 @@ import * as vscode from 'vscode';
 
 class LoggerService {
   private outputChannel: vscode.OutputChannel;
-  private isDevelopment: boolean;
+  private isDevelopment: boolean = false; // Default to prediction (safe)
 
   constructor() {
     this.outputChannel = vscode.window.createOutputChannel('Code Court');
-    this.isDevelopment = process.env.NODE_ENV === 'development';
+    // Default to false, will be updated in initialize()
+    this.isDevelopment = false;
     // Show output channel immediately so it appears in dropdown
     this.outputChannel.show(true); // true = preserveFocus (don't steal focus)
   }
 
   /**
+   * Initialize logger with extension context
+   * Determines environment from ExtensionMode
+   */
+  public initialize(context: vscode.ExtensionContext): void {
+    // Development = 2, Test = 3 (Production = 1)
+    // We consider Development mode if it's explicitly Development
+    this.isDevelopment = context.extensionMode === vscode.ExtensionMode.Development;
+
+    if (this.isDevelopment) {
+      this.info('Logger initialized in DEVELOPMENT mode');
+    }
+  }
+
+  /**
    * Log info message
+   * Only shown in Development mode (same as debug) to keep production clean
    */
   public info(message: string): void {
+    // Suppress info logs in production, same as debug
+    if (!this.isDevelopment) {
+      return;
+    }
+
     const timestamp = new Date().toISOString();
     this.outputChannel.appendLine(`[INFO ${timestamp}] ${message}`);
   }
