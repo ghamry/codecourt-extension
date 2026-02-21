@@ -6,6 +6,7 @@
 
 import * as vscode from 'vscode';
 import { CodeCourtClient } from '../api/CodeCourtClient';
+import { AuthManager } from '../auth/AuthManager';
 import { Snippet, SnippetSearchParams } from '../types';
 import { Logger } from '../utils/Logger';
 
@@ -57,7 +58,10 @@ export class SnippetsProvider implements vscode.TreeDataProvider<vscode.TreeItem
   private snippets: Snippet[] = [];
   private filterQuery: string = '';
 
-  constructor(private readonly apiClient: CodeCourtClient) { }
+  constructor(
+    private readonly apiClient: CodeCourtClient,
+    private readonly authManager: AuthManager,
+  ) { }
 
   /**
    * Set filter query for tree view
@@ -95,12 +99,24 @@ export class SnippetsProvider implements vscode.TreeDataProvider<vscode.TreeItem
     } catch (error) {
       Logger.error('Failed to refresh snippets', error);
 
-      // Check if it's an authentication error
+      // Check if it's an authentication error (stale/expired token)
       const errorMessage = error instanceof Error ? error.message : '';
       if (errorMessage.includes('Unauthorized') || errorMessage.includes('401')) {
-        Logger.info('Not authenticated - clearing snippets');
+        Logger.warn('Received 401 — clearing stale token and prompting re-login');
         this.snippets = [];
         this._onDidChangeTreeData.fire();
+
+        // Clear the invalid stored token so isAuthenticated() returns false next time
+        await this.authManager.clearAuth();
+
+        // Prompt user to sign in again
+        const action = await vscode.window.showWarningMessage(
+          'Code Court: Your session has expired. Please sign in again.',
+          'Sign In'
+        );
+        if (action === 'Sign In') {
+          await vscode.commands.executeCommand('codecourt.authenticate');
+        }
       } else {
         vscode.window.showErrorMessage('Failed to load snippets. Please check your connection.');
       }

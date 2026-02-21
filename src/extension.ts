@@ -28,7 +28,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // Initialize core services following Dependency Injection pattern
     const authManager = new AuthManager(context);
     const apiClient = new CodeCourtClient(authManager);
-    const snippetsProvider = new SnippetsProvider(apiClient);
+    const snippetsProvider = new SnippetsProvider(apiClient, authManager);
 
     // Register URI handler for OAuth callbacks
     const uriHandler = vscode.window.registerUriHandler({

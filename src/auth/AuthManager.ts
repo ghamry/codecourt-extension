@@ -63,6 +63,7 @@ export class AuthManager {
   /**
    * Start modern OAuth authentication flow with automatic callback
    * Opens browser, user approves, VS Code receives callback automatically
+   * Supports VS Code forks: Cursor, Windsurf, Antigravity (uses their native uriScheme)
    */
   public async authenticate(): Promise<boolean> {
     try {
@@ -75,9 +76,18 @@ export class AuthManager {
       // Generate random state for security (CSRF protection)
       const state = this.generateRandomString(32);
 
-      // Build OAuth URL with callback
+      // Build OAuth URL with callback.
+      // vscode.env.uriScheme reflects the actual host IDE:
+      //   "vscode"       → VS Code
+      //   "cursor"       → Cursor IDE
+      //   "windsurf"     → Windsurf IDE
+      //   "antigravity"  → Antigravity IDE
+      // Using it directly ensures the deep-link opens in the correct application.
+      const uriScheme = vscode.env.uriScheme;
+      Logger.debug('Detected IDE URI scheme', { uriScheme });
+
       const callbackUri = await vscode.env.asExternalUri(
-        vscode.Uri.parse(`${vscode.env.uriScheme}://codecourt.codecourt/auth-callback`)
+        vscode.Uri.parse(`${uriScheme}://codecourt.codecourt/auth-callback`)
       );
 
       const authUrl = `${apiUrl}/vscode-auth?state=${state}&callbackUri=${encodeURIComponent(callbackUri.toString())}`;
