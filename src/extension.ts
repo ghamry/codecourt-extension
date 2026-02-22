@@ -21,7 +21,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   Logger.info('Code Court extension is activating...');
   Logger.debug('Environment', {
     extensionMode: context.extensionMode,
-    isDevelopment: context.extensionMode === vscode.ExtensionMode.Development
+    isDevelopment: context.extensionMode === vscode.ExtensionMode.Development,
   });
 
   try {
@@ -57,11 +57,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // Auto-refresh snippets if user is authenticated and setting is enabled
     const config = vscode.workspace.getConfiguration('codecourt');
     const autoRefresh = config.get<boolean>('autoRefresh', true);
+    const isAuthenticated = await authManager.isAuthenticated();
 
-    if (autoRefresh && (await authManager.isAuthenticated())) {
+    if (autoRefresh && isAuthenticated) {
       Logger.info('Auto-refreshing snippets...');
       await snippetsProvider.refresh();
-    } else if (!(await authManager.isAuthenticated())) {
+    } else if (!isAuthenticated) {
       // Show welcome message for first-time users
       showWelcomeMessage(authManager);
     }

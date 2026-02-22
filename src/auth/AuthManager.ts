@@ -6,7 +6,7 @@
 
 import * as vscode from 'vscode';
 import axios from 'axios';
-import { AuthData, TokenResponse } from '../types';
+import { AuthData } from '../types';
 import { Logger } from '../utils/Logger';
 import { getAuthTimeout } from '../utils/config';
 
@@ -15,7 +15,7 @@ const AUTH_SECRET_KEY = 'codecourt.auth';
 export class AuthManager {
   private authPromiseResolve?: (success: boolean) => void;
 
-  constructor(private readonly context: vscode.ExtensionContext) { }
+  constructor(private readonly context: vscode.ExtensionContext) {}
 
   /**
    * Check if user is authenticated
@@ -71,7 +71,10 @@ export class AuthManager {
 
       // Get API URL from config
       const config = vscode.workspace.getConfiguration('codecourt');
-      const apiUrl = config.get<string>('apiUrl') || process.env.CODECOURT_API_URL || 'https://www.codecourt.dev';
+      const apiUrl =
+        config.get<string>('apiUrl') ||
+        process.env.CODECOURT_API_URL ||
+        'https://www.codecourt.dev';
 
       // Generate random state for security (CSRF protection)
       const state = this.generateRandomString(32);
@@ -98,29 +101,30 @@ export class AuthManager {
       await vscode.env.openExternal(vscode.Uri.parse(authUrl));
 
       // Show waiting message with fallback option
-      vscode.window.showInformationMessage(
-        'Waiting for browser authentication...',
-        'Enter Token Manually'
-      ).then(async selection => {
-        if (selection === 'Enter Token Manually') {
-          const token = await vscode.window.showInputBox({
-            prompt: 'Paste your Code Court authentication token here',
-            password: true,
-            ignoreFocusOut: true,
-          });
+      vscode.window
+        .showInformationMessage('Waiting for browser authentication...', 'Enter Token Manually')
+        .then(async (selection) => {
+          if (selection === 'Enter Token Manually') {
+            const token = await vscode.window.showInputBox({
+              prompt: 'Paste your Code Court authentication token here',
+              password: true,
+              ignoreFocusOut: true,
+            });
 
-          if (token) {
-            try {
-              await this.verifyAndStoreToken(token);
-              // Refresh snippets whether or not the promise is still live
-              await vscode.commands.executeCommand('codecourt.refreshSnippets');
-            } catch (err) {
-              Logger.error('Manual token verification failed', err);
-              vscode.window.showErrorMessage(`Invalid token: ${err instanceof Error ? err.message : 'Unknown error'}`);
+            if (token) {
+              try {
+                await this.verifyAndStoreToken(token);
+                // Refresh snippets whether or not the promise is still live
+                await vscode.commands.executeCommand('codecourt.refreshSnippets');
+              } catch (err) {
+                Logger.error('Manual token verification failed', err);
+                vscode.window.showErrorMessage(
+                  `Invalid token: ${err instanceof Error ? err.message : 'Unknown error'}`
+                );
+              }
             }
           }
-        }
-      });
+        });
 
       // Wait for callback (with timeout)
       return new Promise<boolean>((resolve) => {
@@ -135,7 +139,6 @@ export class AuthManager {
           }
         }, getAuthTimeout());
       });
-
     } catch (error) {
       Logger.error('Authentication failed', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -154,7 +157,7 @@ export class AuthManager {
       Logger.debug('Callback URI details', {
         toString: uri.toString(),
         query: uri.query,
-        path: uri.path
+        path: uri.path,
       });
 
       // Parse query parameters
@@ -188,7 +191,6 @@ export class AuthManager {
       }
 
       await this.verifyAndStoreToken(token);
-
     } catch (error) {
       Logger.error('Failed to handle auth callback', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -209,7 +211,10 @@ export class AuthManager {
     try {
       // Get API URL
       const config = vscode.workspace.getConfiguration('codecourt');
-      const apiUrl = config.get<string>('apiUrl') || process.env.CODECOURT_API_URL || 'https://www.codecourt.dev';
+      const apiUrl =
+        config.get<string>('apiUrl') ||
+        process.env.CODECOURT_API_URL ||
+        'https://www.codecourt.dev';
 
       // Verify token with API using Axios
       const verifyUrl = `${apiUrl}/api/auth/vscode-verify`;
@@ -218,12 +223,16 @@ export class AuthManager {
         valid?: boolean;
         user?: { id: string; email: string; name: string };
         expiresAt?: string;
-      }>(verifyUrl, { token }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        timeout: 10000
-      });
+      }>(
+        verifyUrl,
+        { token },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          timeout: 10000,
+        }
+      );
 
       const data = response.data;
 
@@ -244,14 +253,15 @@ export class AuthManager {
       Logger.info(`User authenticated: ${authData.email}`);
 
       // Show success message
-      vscode.window.showInformationMessage(`Welcome to Code Court, ${data.user.name || 'User'}! 🎉`);
+      vscode.window.showInformationMessage(
+        `Welcome to Code Court, ${data.user.name || 'User'}! 🎉`
+      );
 
       // Resolve the waiting promise
       if (this.authPromiseResolve) {
         this.authPromiseResolve(true);
         this.authPromiseResolve = undefined;
       }
-
     } catch (error) {
       Logger.error('Failed to handle auth callback', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -275,22 +285,6 @@ export class AuthManager {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
-  }
-
-  /**
-   * Store authentication data securely
-   */
-  public async setAuthData(tokenResponse: TokenResponse): Promise<void> {
-    const authData: AuthData = {
-      accessToken: tokenResponse.accessToken,
-      userId: tokenResponse.userId,
-      email: tokenResponse.email,
-      name: tokenResponse.name,
-      expiresAt: Date.now() + tokenResponse.expiresIn * 1000,
-    };
-
-    await this.context.secrets.store(AUTH_SECRET_KEY, JSON.stringify(authData));
-    Logger.info(`User authenticated: ${authData.email}`);
   }
 
   /**

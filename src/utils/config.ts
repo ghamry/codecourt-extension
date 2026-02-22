@@ -50,7 +50,7 @@ export function getAuthTimeout(): number {
   const config = vscode.workspace.getConfiguration('codecourt');
   // Priority: VS Code Settings > Environment Variable > Default
   const configuredTimeout = config.get<number>('authTimeout');
-  
+
   if (configuredTimeout) {
     return configuredTimeout;
   }

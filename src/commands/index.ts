@@ -11,7 +11,6 @@ import { SnippetsProvider, SnippetTreeItem } from '../providers/SnippetsProvider
 import { Logger } from '../utils/Logger';
 import { getApiBaseUrl } from '../utils/config';
 
-
 /**
  * Register all extension commands
  */
@@ -121,7 +120,7 @@ async function signOutCommand(
   if (confirm === 'Sign Out') {
     await authManager.clearAuth();
     vscode.window.showInformationMessage('Signed out successfully');
-    snippetsProvider.refresh(); // Will show empty state
+    await snippetsProvider.refresh();
   }
 }
 
@@ -199,7 +198,9 @@ async function createSnippetCommand(
   const code = selection.isEmpty ? editor.document.getText() : editor.document.getText(selection);
 
   if (!code.trim()) {
-    vscode.window.showWarningMessage('No code to create snippet from. Please select some code or open a file.');
+    vscode.window.showWarningMessage(
+      'No code to create snippet from. Please select some code or open a file.'
+    );
     return;
   }
 
@@ -214,39 +215,48 @@ async function createSnippetCommand(
           return 'Title must be at least 3 characters';
         }
         return null;
-      }
+      },
     });
 
-    if (!title) return;
+    if (!title) {
+      return;
+    }
 
     const description = await vscode.window.showInputBox({
       prompt: 'Enter snippet description (optional)',
-      placeHolder: 'What does this snippet do?'
+      placeHolder: 'What does this snippet do?',
     });
 
     const tagsInput = await vscode.window.showInputBox({
       prompt: 'Enter tags (comma-separated, optional)',
-      placeHolder: 'react, hooks, useEffect'
+      placeHolder: 'react, hooks, useEffect',
     });
 
-    const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : [];
+    const tags = tagsInput
+      ? tagsInput
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0)
+      : [];
 
     const visibility = await vscode.window.showQuickPick(
       [
         { label: 'Public', description: 'Anyone can view', value: 'PUBLIC' },
         { label: 'Protected', description: 'Only followers can view', value: 'PROTECTED' },
-        { label: 'Private', description: 'Only you can view', value: 'PRIVATE' }
+        { label: 'Private', description: 'Only you can view', value: 'PRIVATE' },
       ],
       { placeHolder: 'Select snippet visibility', canPickMany: false }
     );
 
-    if (!visibility) return;
+    if (!visibility) {
+      return;
+    }
 
     await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
         title: 'Creating snippet...',
-        cancellable: false
+        cancellable: false,
       },
       async () => {
         const snippet = await apiClient.createSnippet({
@@ -255,7 +265,7 @@ async function createSnippetCommand(
           code,
           language: languageId,
           tags,
-          visibility: visibility.value as 'PUBLIC' | 'PROTECTED' | 'PRIVATE'
+          visibility: visibility.value as 'PUBLIC' | 'PROTECTED' | 'PRIVATE',
         });
 
         Logger.info(`Snippet created: ${snippet.id}`);
@@ -285,9 +295,7 @@ async function createSnippetCommand(
 /**
  * Search snippets command handler
  */
-async function searchSnippetsCommand(
-  snippetsProvider: SnippetsProvider
-): Promise<void> {
+async function searchSnippetsCommand(snippetsProvider: SnippetsProvider): Promise<void> {
   const query = await vscode.window.showInputBox({
     prompt: 'Filter snippets in sidebar',
     placeHolder: 'Enter keywords to filter...',
@@ -305,12 +313,9 @@ async function searchSnippetsCommand(
 /**
  * Clear filter command handler
  */
-async function clearFilterCommand(
-  snippetsProvider: SnippetsProvider
-): Promise<void> {
+async function clearFilterCommand(snippetsProvider: SnippetsProvider): Promise<void> {
   await snippetsProvider.setFilter('');
 }
-
 
 /**
  * Delete snippet command handler
@@ -328,10 +333,16 @@ async function deleteSnippetCommand(
       'Cancel'
     );
 
-    if (confirm !== 'Delete') return;
+    if (confirm !== 'Delete') {
+      return;
+    }
 
     await vscode.window.withProgress(
-      { location: vscode.ProgressLocation.Notification, title: 'Deleting snippet...', cancellable: false },
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: 'Deleting snippet...',
+        cancellable: false,
+      },
       async () => {
         await apiClient.deleteSnippet(item.snippet.id);
       }
@@ -368,25 +379,28 @@ async function editSnippetCommand(
     const title = await vscode.window.showInputBox({
       prompt: 'Edit Snippet Title',
       value: item.snippet.title,
-      validateInput: (value) => value.length < 3 ? 'Title must be at least 3 characters' : null
+      validateInput: (value) => (value.length < 3 ? 'Title must be at least 3 characters' : null),
     });
-    if (title === undefined) return; // Cancelled
+    if (title === undefined) {
+      return;
+    } // Cancelled
 
     // 2. Edit Description
     const description = await vscode.window.showInputBox({
       prompt: 'Edit Description (Optional)',
-      value: item.snippet.description || ''
+      value: item.snippet.description || '',
     });
-    if (description === undefined) return;
+    if (description === undefined) {
+      return;
+    }
 
     // 3. Edit Visibility
-    const visibility = await vscode.window.showQuickPick(
-      ['PUBLIC', 'PROTECTED', 'PRIVATE'],
-      {
-        placeHolder: `Select Visibility (Current: ${item.snippet.visibility})`
-      }
-    );
-    if (!visibility) return;
+    const visibility = await vscode.window.showQuickPick(['PUBLIC', 'PROTECTED', 'PRIVATE'], {
+      placeHolder: `Select Visibility (Current: ${item.snippet.visibility})`,
+    });
+    if (!visibility) {
+      return;
+    }
 
     // 4. Update via API
     await vscode.window.withProgress(
@@ -396,17 +410,16 @@ async function editSnippetCommand(
         await apiClient.updateSnippet(item.snippet.id, {
           title,
           description,
-          visibility: visibility as any,
+          visibility: visibility as 'PUBLIC' | 'PROTECTED' | 'PRIVATE',
           code: item.snippet.code,
           language: item.snippet.language,
-          tags: item.snippet.tags
+          tags: item.snippet.tags,
         });
       }
     );
 
     vscode.window.showInformationMessage(`Updated: ${title}`);
     await snippetsProvider.refresh();
-
   } catch (error) {
     Logger.error('Failed to update snippet', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

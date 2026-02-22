@@ -48,9 +48,6 @@ export class SnippetTreeItem extends vscode.TreeItem {
 /**
  * Tree data provider for Code Court snippets
  */
-/**
- * Tree data provider for Code Court snippets
- */
 export class SnippetsProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
   private _onDidChangeTreeData = new vscode.EventEmitter<vscode.TreeItem | undefined | void>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -60,8 +57,8 @@ export class SnippetsProvider implements vscode.TreeDataProvider<vscode.TreeItem
 
   constructor(
     private readonly apiClient: CodeCourtClient,
-    private readonly authManager: AuthManager,
-  ) { }
+    private readonly authManager: AuthManager
+  ) {}
 
   /**
    * Set filter query for tree view
@@ -139,15 +136,39 @@ export class SnippetsProvider implements vscode.TreeDataProvider<vscode.TreeItem
     }
 
     if (this.snippets.length === 0) {
-      // If filtering and no results, show a message
       if (this.filterQuery) {
+        // No results for the active filter
         const messageItem = new vscode.TreeItem(`No snippets found for "${this.filterQuery}"`);
         messageItem.contextValue = 'message';
         messageItem.iconPath = new vscode.ThemeIcon('info');
         messageItem.tooltip = 'Try a different search term or clear the filter';
         return [messageItem];
       }
-      return [];
+
+      // Not filtering — check auth state and guide the user
+      const isAuth = await this.authManager.isAuthenticated();
+      if (!isAuth) {
+        const signInItem = new vscode.TreeItem('Sign in to Code Court');
+        signInItem.contextValue = 'message';
+        signInItem.iconPath = new vscode.ThemeIcon('sign-in');
+        signInItem.tooltip = 'Click to sign in and load your snippets';
+        signInItem.command = {
+          command: 'codecourt.authenticate',
+          title: 'Sign In',
+        };
+        return [signInItem];
+      }
+
+      // Authenticated but no snippets yet
+      const emptyItem = new vscode.TreeItem('No snippets yet — create one!');
+      emptyItem.contextValue = 'message';
+      emptyItem.iconPath = new vscode.ThemeIcon('add');
+      emptyItem.tooltip = 'Use "Create Snippet from Selection" to add your first snippet';
+      emptyItem.command = {
+        command: 'codecourt.createSnippet',
+        title: 'Create Snippet',
+      };
+      return [emptyItem];
     }
 
     // Group snippets by language for better organization

@@ -69,7 +69,9 @@ export class CodeCourtClient {
   public async getSnippet(id: string): Promise<Snippet> {
     try {
       Logger.info(`Fetching snippet: ${id}`);
-      const response = await this.axiosInstance.get<{ snippet: Snippet }>(`/api/vscode/snippets/${id}`);
+      const response = await this.axiosInstance.get<{ snippet: Snippet }>(
+        `/api/vscode/snippets/${id}`
+      );
       return response.data.snippet;
     } catch (error) {
       Logger.error(`Failed to fetch snippet ${id}`, error);
@@ -131,7 +133,9 @@ export class CodeCourtClient {
 
       // Special handling for 405 Method Not Allowed - indicates backend mismatch
       if (status === 405) {
-        return new Error(`Server returned 405 Method Not Allowed. The backend might not support deleting snippets yet. Error: ${message}`);
+        return new Error(
+          `Server returned 405 Method Not Allowed. The backend might not support deleting snippets yet. Error: ${message}`
+        );
       }
 
       return new Error(`API Error (${status}): ${message}`);
