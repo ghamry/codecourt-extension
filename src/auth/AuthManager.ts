@@ -97,11 +97,30 @@ export class AuthManager {
       // Open browser
       await vscode.env.openExternal(vscode.Uri.parse(authUrl));
 
-      // Show waiting message
+      // Show waiting message with fallback option
       vscode.window.showInformationMessage(
-        'Opening browser for authentication. After you approve, you\'ll be automatically signed in.',
-        { modal: false }
-      );
+        'Waiting for browser authentication...',
+        'Enter Token Manually'
+      ).then(async selection => {
+        if (selection === 'Enter Token Manually') {
+          const token = await vscode.window.showInputBox({
+            prompt: 'Paste your Code Court authentication token here',
+            password: true,
+            ignoreFocusOut: true,
+          });
+
+          if (token) {
+            try {
+              await this.verifyAndStoreToken(token);
+              // Refresh snippets whether or not the promise is still live
+              await vscode.commands.executeCommand('codecourt.refreshSnippets');
+            } catch (err) {
+              Logger.error('Manual token verification failed', err);
+              vscode.window.showErrorMessage(`Invalid token: ${err instanceof Error ? err.message : 'Unknown error'}`);
+            }
+          }
+        }
+      });
 
       // Wait for callback (with timeout)
       return new Promise<boolean>((resolve) => {
@@ -168,6 +187,26 @@ export class AuthManager {
         throw new Error('No token received from callback');
       }
 
+      await this.verifyAndStoreToken(token);
+
+    } catch (error) {
+      Logger.error('Failed to handle auth callback', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Authentication failed: ${errorMessage}`);
+
+      // Reject the waiting promise
+      if (this.authPromiseResolve) {
+        this.authPromiseResolve(false);
+        this.authPromiseResolve = undefined;
+      }
+    }
+  }
+
+  /**
+   * Internal method to verify and store token
+   */
+  private async verifyAndStoreToken(token: string): Promise<void> {
+    try {
       // Get API URL
       const config = vscode.workspace.getConfiguration('codecourt');
       const apiUrl = config.get<string>('apiUrl') || process.env.CODECOURT_API_URL || 'https://www.codecourt.dev';
